@@ -10,11 +10,13 @@ to handle unstructured issue descriptions.
 import re
 import os
 import json
+import yaml
 import requests
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from urllib.parse import urlparse
+from pathlib import Path
 
 
 @dataclass
@@ -56,42 +58,6 @@ class GitHubIssueAnalyzer:
     LIBERTY_PATTERN = re.compile(r'io\.openliberty\.[a-z0-9._]+', re.IGNORECASE)
     IBM_PATTERN = re.compile(r'com\.ibm\.ws\.[a-z0-9._]+', re.IGNORECASE)
     
-    # Keyword-to-package mappings for natural language issues
-    KEYWORD_MAPPINGS = {
-        'ltpa': [
-            ('com.ibm.ws.security.token.ltpa', 0.90, 'LTPA token processing'),
-            ('com.ibm.ws.crypto.ltpakeyutil', 0.95, 'LTPA key generation and encryption'),
-            ('com.ibm.ws.security.token.ltpa.internal', 0.85, 'Internal LTPA implementation')
-        ],
-        'ltpa.keys': [
-            ('com.ibm.ws.crypto.ltpakeyutil', 0.95, 'LTPA key file operations'),
-        ],
-        'securityutility': [
-            ('com.ibm.ws.security.utility', 0.90, 'securityUtility command'),
-        ],
-        'security utility': [
-            ('com.ibm.ws.security.utility', 0.90, 'securityUtility command'),
-        ],
-        'pqc': [
-            ('com.ibm.ws.crypto.ltpakeyutil', 0.85, 'Post-quantum cryptography support'),
-        ],
-        'fips': [
-            ('com.ibm.ws.crypto.ltpakeyutil', 0.80, 'FIPS compliance'),
-        ],
-        'jwt': [
-            ('io.openliberty.security.jwt', 0.90, 'JWT token processing'),
-            ('io.openliberty.security.jwt.internal', 0.85, 'Internal JWT implementation'),
-        ],
-        'jakartasec': [
-            ('io.openliberty.security.jakartasec.3.0.internal', 0.85, 'Jakarta Security 3.0'),
-            ('io.openliberty.security.jakartasec.4.0.internal', 0.85, 'Jakarta Security 4.0'),
-        ],
-        'jakarta security': [
-            ('io.openliberty.security.jakartasec.3.0.internal', 0.85, 'Jakarta Security 3.0'),
-            ('io.openliberty.security.jakartasec.4.0.internal', 0.85, 'Jakarta Security 4.0'),
-        ],
-    }
-    
     # Context keywords that increase confidence
     CONTEXT_KEYWORDS = {
         'error': 1.1,
@@ -109,12 +75,13 @@ class GitHubIssueAnalyzer:
     INTERNAL_SUFFIX = re.compile(r'\.internal$')
     IMPL_SUFFIX = re.compile(r'\.impl$')
     
-    def __init__(self, github_token: Optional[str] = None):
+    def __init__(self, github_token: Optional[str] = None, mappings_file: Optional[str] = None):
         """
         Initialize the analyzer.
         
         Args:
             github_token: GitHub personal access token (optional, but recommended)
+            mappings_file: Path to YAML file with keyword mappings (optional)
         """
         self.github_token = github_token or os.getenv('GITHUB_TOKEN')
         self.session = requests.Session()
@@ -123,6 +90,40 @@ class GitHubIssueAnalyzer:
                 'Authorization': f'token {self.github_token}',
                 'Accept': 'application/vnd.github.v3+json'
             })
+        
+        # Load keyword mappings from YAML file
+        self.keyword_mappings = self._load_keyword_mappings(mappings_file)
+    
+    def _load_keyword_mappings(self, mappings_file: Optional[str] = None) -> Dict:
+        """Load keyword-to-package mappings from YAML file."""
+        if mappings_file is None:
+            # Default to package_mappings.yaml in same directory
+            script_dir = Path(__file__).parent
+            mappings_file = str(script_dir / 'package_mappings.yaml')
+        
+        try:
+            with open(mappings_file, 'r') as f:
+                raw_mappings = yaml.safe_load(f) or {}
+            
+            # Convert YAML format to internal format
+            # YAML: keyword: [{package, confidence, context, type}, ...]
+            # Internal: keyword: [(package, confidence, context), ...]
+            mappings = {}
+            for keyword, entries in raw_mappings.items():
+                mappings[keyword] = [
+                    (entry['package'], entry['confidence'], entry['context'])
+                    for entry in entries
+                ]
+            
+            return mappings
+        except FileNotFoundError:
+            print(f"Warning: Mappings file not found: {mappings_file}")
+            print("Continuing with regex-only package detection.")
+            return {}
+        except Exception as e:
+            print(f"Warning: Error loading mappings file: {e}")
+            print("Continuing with regex-only package detection.")
+            return {}
     
     def analyze_issue(self, issue_url: str) -> AnalysisResult:
         """
@@ -334,13 +335,13 @@ class GitHubIssueAnalyzer:
         """
         Find packages based on keyword mappings for natural language issues.
         
-        This helps identify packages when issues use terms like "LTPA" or 
+        This helps identify packages when issues use terms like "LTPA" or
         "securityUtility" instead of explicit package names.
         """
         packages = []
         text_lower = text.lower()
         
-        for keyword, mappings in self.KEYWORD_MAPPINGS.items():
+        for keyword, mappings in self.keyword_mappings.items():
             if keyword in text_lower:
                 for package_name, confidence, context in mappings:
                     # Determine package type

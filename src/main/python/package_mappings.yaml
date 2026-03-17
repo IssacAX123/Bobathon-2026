@@ -1,0 +1,202 @@
+# Package Keyword Mappings Configuration
+# 
+# This file maps natural language keywords to Liberty packages.
+# Add new mappings as you discover common terms in GitHub issues.
+#
+# Format:
+#   keyword:
+#     - package: full.package.name
+#       confidence: 0.0-1.0
+#       context: Description of what this package does
+#       type: LIBERTY or IBM
+
+# Security & Authentication
+ltpa:
+  - package: com.ibm.ws.security.token.ltpa
+    confidence: 0.90
+    context: LTPA token processing
+    type: IBM
+  - package: com.ibm.ws.crypto.ltpakeyutil
+    confidence: 0.95
+    context: LTPA key generation and encryption
+    type: IBM
+  - package: com.ibm.ws.security.token.ltpa.internal
+    confidence: 0.85
+    context: Internal LTPA implementation
+    type: IBM
+
+ltpa.keys:
+  - package: com.ibm.ws.crypto.ltpakeyutil
+    confidence: 0.95
+    context: LTPA key file operations
+    type: IBM
+
+securityutility:
+  - package: com.ibm.ws.security.utility
+    confidence: 0.90
+    context: securityUtility command
+    type: IBM
+
+security utility:
+  - package: com.ibm.ws.security.utility
+    confidence: 0.90
+    context: securityUtility command
+    type: IBM
+
+pqc:
+  - package: com.ibm.ws.crypto.ltpakeyutil
+    confidence: 0.85
+    context: Post-quantum cryptography support
+    type: IBM
+
+fips:
+  - package: com.ibm.ws.crypto.ltpakeyutil
+    confidence: 0.80
+    context: FIPS compliance
+    type: IBM
+
+jwt:
+  - package: io.openliberty.security.jwt
+    confidence: 0.90
+    context: JWT token processing
+    type: LIBERTY
+  - package: io.openliberty.security.jwt.internal
+    confidence: 0.85
+    context: Internal JWT implementation
+    type: LIBERTY
+
+jakartasec:
+  - package: io.openliberty.security.jakartasec.3.0.internal
+    confidence: 0.85
+    context: Jakarta Security 3.0
+    type: LIBERTY
+  - package: io.openliberty.security.jakartasec.4.0.internal
+    confidence: 0.85
+    context: Jakarta Security 4.0
+    type: LIBERTY
+
+jakarta security:
+  - package: io.openliberty.security.jakartasec.3.0.internal
+    confidence: 0.85
+    context: Jakarta Security 3.0
+    type: LIBERTY
+  - package: io.openliberty.security.jakartasec.4.0.internal
+    confidence: 0.85
+    context: Jakarta Security 4.0
+    type: LIBERTY
+
+# CDI & Dependency Injection
+cdi:
+  - package: io.openliberty.cdi
+    confidence: 0.90
+    context: CDI implementation
+    type: LIBERTY
+  - package: io.openliberty.cdi.internal
+    confidence: 0.85
+    context: Internal CDI implementation
+    type: LIBERTY
+
+# JAX-RS & REST
+jaxrs:
+  - package: io.openliberty.jaxrs
+    confidence: 0.90
+    context: JAX-RS REST services
+    type: LIBERTY
+  - package: com.ibm.ws.jaxrs
+    confidence: 0.85
+    context: JAX-RS implementation
+    type: IBM
+
+rest:
+  - package: io.openliberty.jaxrs
+    confidence: 0.85
+    context: REST services
+    type: LIBERTY
+
+# Persistence & JPA
+jpa:
+  - package: io.openliberty.persistence
+    confidence: 0.90
+    context: JPA persistence
+    type: LIBERTY
+  - package: com.ibm.ws.jpa
+    confidence: 0.85
+    context: JPA implementation
+    type: IBM
+
+# Messaging
+jms:
+  - package: com.ibm.ws.messaging
+    confidence: 0.90
+    context: JMS messaging
+    type: IBM
+
+# Configuration
+config:
+  - package: io.openliberty.config
+    confidence: 0.85
+    context: Configuration management
+    type: LIBERTY
+
+microprofile config:
+  - package: io.openliberty.microprofile.config
+    confidence: 0.90
+    context: MicroProfile Config
+    type: LIBERTY
+
+# Monitoring & Metrics
+metrics:
+  - package: io.openliberty.microprofile.metrics
+    confidence: 0.90
+    context: MicroProfile Metrics
+    type: LIBERTY
+
+health:
+  - package: io.openliberty.microprofile.health
+    confidence: 0.90
+    context: MicroProfile Health
+    type: LIBERTY
+
+# Fault Tolerance
+fault tolerance:
+  - package: io.openliberty.microprofile.faulttolerance
+    confidence: 0.90
+    context: MicroProfile Fault Tolerance
+    type: LIBERTY
+
+# OpenAPI
+openapi:
+  - package: io.openliberty.microprofile.openapi
+    confidence: 0.90
+    context: MicroProfile OpenAPI
+    type: LIBERTY
+
+# Servlet & Web
+servlet:
+  - package: com.ibm.ws.webcontainer
+    confidence: 0.85
+    context: Servlet container
+    type: IBM
+
+jsp:
+  - package: com.ibm.ws.jsp
+    confidence: 0.85
+    context: JSP processing
+    type: IBM
+
+# Transaction
+transaction:
+  - package: com.ibm.ws.transaction
+    confidence: 0.85
+    context: Transaction management
+    type: IBM
+
+jta:
+  - package: com.ibm.ws.tx.jta
+    confidence: 0.85
+    context: JTA transactions
+    type: IBM
+
+# Add more mappings as needed...
+
+# Made with Bob

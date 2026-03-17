@@ -1,6 +1,9 @@
 # GitHub Issue Analyzer - Python Dependencies
 
 # HTTP requests
+
+# YAML parsing
+pyyaml>=6.0.1
 requests>=2.31.0
 
 # Data validation (optional, for enhanced type checking)

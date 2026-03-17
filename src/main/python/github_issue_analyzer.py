@@ -10,11 +10,13 @@ to handle unstructured issue descriptions.
 import re
 import os
 import json
+import yaml
 import requests
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from urllib.parse import urlparse
+from pathlib import Path
 
 
 @dataclass
@@ -73,12 +75,13 @@ class GitHubIssueAnalyzer:
     INTERNAL_SUFFIX = re.compile(r'\.internal$')
     IMPL_SUFFIX = re.compile(r'\.impl$')
     
-    def __init__(self, github_token: Optional[str] = None):
+    def __init__(self, github_token: Optional[str] = None, mappings_file: Optional[str] = None):
         """
         Initialize the analyzer.
         
         Args:
             github_token: GitHub personal access token (optional, but recommended)
+            mappings_file: Path to YAML file with keyword mappings (optional)
         """
         self.github_token = github_token or os.getenv('GITHUB_TOKEN')
         self.session = requests.Session()
@@ -87,6 +90,40 @@ class GitHubIssueAnalyzer:
                 'Authorization': f'token {self.github_token}',
                 'Accept': 'application/vnd.github.v3+json'
             })
+        
+        # Load keyword mappings from YAML file
+        self.keyword_mappings = self._load_keyword_mappings(mappings_file)
+    
+    def _load_keyword_mappings(self, mappings_file: Optional[str] = None) -> Dict:
+        """Load keyword-to-package mappings from YAML file."""
+        if mappings_file is None:
+            # Default to package_mappings.yaml in same directory
+            script_dir = Path(__file__).parent
+            mappings_file = str(script_dir / 'package_mappings.yaml')
+        
+        try:
+            with open(mappings_file, 'r') as f:
+                raw_mappings = yaml.safe_load(f) or {}
+            
+            # Convert YAML format to internal format
+            # YAML: keyword: [{package, confidence, context, type}, ...]
+            # Internal: keyword: [(package, confidence, context), ...]
+            mappings = {}
+            for keyword, entries in raw_mappings.items():
+                mappings[keyword] = [
+                    (entry['package'], entry['confidence'], entry['context'])
+                    for entry in entries
+                ]
+            
+            return mappings
+        except FileNotFoundError:
+            print(f"Warning: Mappings file not found: {mappings_file}")
+            print("Continuing with regex-only package detection.")
+            return {}
+        except Exception as e:
+            print(f"Warning: Error loading mappings file: {e}")
+            print("Continuing with regex-only package detection.")
+            return {}
     
     def analyze_issue(self, issue_url: str) -> AnalysisResult:
         """
@@ -200,9 +237,10 @@ class GitHubIssueAnalyzer:
         
         This uses multiple strategies:
         1. Direct regex matching
-        2. Context-aware confidence scoring
-        3. Code block detection
-        4. Stack trace parsing
+        2. Keyword-to-package mapping (for natural language)
+        3. Context-aware confidence scoring
+        4. Code block detection
+        5. Stack trace parsing
         """
         packages = []
         text = f"{issue.title}\n\n{issue.body}"
@@ -222,6 +260,10 @@ class GitHubIssueAnalyzer:
         # Strategy 3: Parse stack traces for additional packages
         stack_trace_packages = self._parse_stack_traces(text)
         packages.extend(stack_trace_packages)
+        
+        # Strategy 4: Keyword-to-package mapping (for natural language issues)
+        keyword_packages = self._find_packages_by_keywords(text)
+        packages.extend(keyword_packages)
         
         # Deduplicate and sort by confidence
         packages = self._deduplicate_packages(packages)
@@ -289,6 +331,37 @@ class GitHubIssueAnalyzer:
             ))
         
         return packages
+    def _find_packages_by_keywords(self, text: str) -> List[Package]:
+        """
+        Find packages based on keyword mappings for natural language issues.
+        
+        This helps identify packages when issues use terms like "LTPA" or
+        "securityUtility" instead of explicit package names.
+        """
+        packages = []
+        text_lower = text.lower()
+        
+        for keyword, mappings in self.keyword_mappings.items():
+            if keyword in text_lower:
+                for package_name, confidence, context in mappings:
+                    # Determine package type
+                    if package_name.startswith('io.openliberty'):
+                        pkg_type = 'LIBERTY'
+                    elif package_name.startswith('com.ibm.ws'):
+                        pkg_type = 'IBM'
+                    else:
+                        pkg_type = 'UNKNOWN'
+                    
+                    packages.append(Package(
+                        name=package_name,
+                        confidence=confidence,
+                        context=context,
+                        package_type=pkg_type,
+                        location='inferred'
+                    ))
+        
+        return packages
+    
     
     def _determine_location(self, text: str, position: int) -> str:
         """Determine where in the issue the package was found."""
@@ -374,9 +447,15 @@ def main():
     """CLI entry point for testing."""
     import sys
     
+    # Check for --json-only flag
+    json_only = '--json-only' in sys.argv
+    if json_only:
+        sys.argv.remove('--json-only')
+    
     if len(sys.argv) < 2:
-        print("Usage: python github_issue_analyzer.py <issue_url>")
+        print("Usage: python github_issue_analyzer.py [--json-only] <issue_url>")
         print("Example: python github_issue_analyzer.py https://github.com/OpenLiberty/open-liberty/issues/12345")
+        print("  --json-only: Output only JSON (for piping to diagram_generator.py)")
         sys.exit(1)
     
     issue_url = sys.argv[1]
@@ -385,16 +464,26 @@ def main():
     analyzer = GitHubIssueAnalyzer()
     
     # Analyze issue
-    print(f"Analyzing issue: {issue_url}")
-    print()
+    if not json_only:
+        print(f"Analyzing issue: {issue_url}")
+        print()
     
     result = analyzer.analyze_issue(issue_url)
     
     if not result.success:
-        print(f"❌ Error: {result.error_message}")
+        if json_only:
+            # Output error as JSON for downstream tools
+            print(analyzer.to_json(result))
+        else:
+            print(f"❌ Error: {result.error_message}")
         sys.exit(1)
     
-    # Print results
+    # JSON-only mode: just output JSON and exit
+    if json_only:
+        print(analyzer.to_json(result))
+        sys.exit(0)
+    
+    # Human-readable output
     print(f"✅ Analysis complete in {result.analysis_time_ms}ms")
     print()
     

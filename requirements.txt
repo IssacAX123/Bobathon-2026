@@ -1,7 +1,12 @@
-# GitHub Issue Analyzer - Minimal MVP Requirements
+# GitHub Issue Analyzer - Requirements
 
-# MCP SDK for creating tools that Bob can use
+# Core dependencies
+requests>=2.31.0
+
+# Web UI (Flask)
+Flask>=3.0.0
+
+# MCP Server - SDK for creating tools that Bob can use
 mcp>=0.9.0
 
-# No other dependencies needed!
-# Uses built-in Python libraries and GitHub CLI (gh) for GitHub operations
+# Note: Uses built-in Python libraries and GitHub CLI (gh) for GitHub operations

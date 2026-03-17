@@ -660,30 +660,35 @@
                         required
                     >
                 </div>
+                
+                <div class="token-section">
+                    <label class="token-label" for="githubToken">
+                        🔐 GitHub Token
+                        <span class="token-badge">Optional</span>
+                    </label>
+                    <div class="token-input-wrapper">
+                        <input
+                            type="password"
+                            id="githubToken"
+                            placeholder="Required for private repos or GitHub Enterprise (github.ibm.com)"
+                        >
+                        <button type="button" class="show-token-btn" onclick="toggleTokenVisibility()">Show</button>
+                    </div>
+                    <div class="token-help">
+                        💡 For GitHub Enterprise or private repos. <a href="https://github.com/settings/tokens" target="_blank">Get a token</a>
+                    </div>
+                </div>
+
                 <button type="submit" class="btn" id="analyzeBtn">
                     🔍 Analyze Issue
+                </button>
+                
+                <button type="button" class="btn" id="postCommentBtn" style="display: none; margin-top: 15px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                    💬 Post Analysis to GitHub
                 </button>
             </form>
 
             <div class="example-links">
-            <div class="token-section">
-                <label class="token-label" for="githubToken">
-                    🔐 GitHub Token
-                    <span class="token-badge">Optional</span>
-                </label>
-                <div class="token-input-wrapper">
-                    <input
-                        type="password"
-                        id="githubToken"
-                        placeholder="Required for private repos or GitHub Enterprise (github.ibm.com)"
-                    >
-                    <button type="button" class="show-token-btn" onclick="toggleTokenVisibility()">Show</button>
-                </div>
-                <div class="token-help">
-                    💡 For GitHub Enterprise or private repos. <a href="https://github.com/settings/tokens" target="_blank">Get a token</a>
-                </div>
-            </div>
-
                 <h4>📝 Try these example issues:</h4>
                 <a href="#" class="example-link" data-url="https://github.com/OpenLiberty/open-liberty/issues/28000">OpenLiberty #28000 - MicroProfile Config</a>
                 <a href="#" class="example-link" data-url="https://github.com/OpenLiberty/open-liberty/issues/27500">OpenLiberty #27500 - Security Feature</a>
@@ -844,7 +849,7 @@
                     }).join('');
 
                 // Generate and display diagram
-                generateDiagram(data.packages, data.issue.title);
+                generateDiagram(data.packages, data.issue);
             } else {
                 packagesList.innerHTML = `
                     <div class="no-packages">
@@ -856,6 +861,16 @@
                 document.getElementById('diagramContainer').style.display = 'none';
             }
 
+            // Show post comment button if token is available
+            const githubToken = document.getElementById('githubToken').value.trim();
+            const postCommentBtn = document.getElementById('postCommentBtn');
+            if (githubToken && data.packages.length > 0) {
+                postCommentBtn.style.display = 'block';
+                postCommentBtn.onclick = () => postCommentToGitHub(data);
+            } else {
+                postCommentBtn.style.display = 'none';
+            }
+
             results.classList.add('active');
             // Smooth scroll to results
             setTimeout(() => {
@@ -863,22 +878,22 @@
             }, 100);
         }
 
-        async function generateDiagram(packages, issueTitle) {
+        async function generateDiagram(packages, issue) {
             try {
                 const response = await fetch('/api/generate-diagram', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         packages: packages,
-                        issue_title: issueTitle
+                        issue: issue
                     })
                 });
 
                 const data = await response.json();
 
-                if (data.diagram) {
+                if (data.success && data.diagram) {
                     const diagramContainer = document.getElementById('diagramContainer');
                     const mermaidDiv = document.getElementById('mermaidDiagram');
                     
@@ -886,9 +901,102 @@
                     mermaid.init(undefined, mermaidDiv);
                     
                     diagramContainer.style.display = 'block';
+                    
+                    // Show additional packages if any
+                    if (data.additional_packages && data.additional_packages.length > 0) {
+                        const additionalInfo = document.createElement('p');
+                        additionalInfo.style.marginTop = '15px';
+                        additionalInfo.style.color = '#666';
+                        additionalInfo.style.fontSize = '14px';
+                        additionalInfo.innerHTML = `<strong>Note:</strong> Showing top 5 packages. ${data.additional_packages.length} additional package(s) identified.`;
+                        diagramContainer.appendChild(additionalInfo);
+                    }
                 }
             } catch (err) {
                 console.error('Failed to generate diagram:', err);
+            }
+        }
+
+        async function postCommentToGitHub(analysisData) {
+            const postCommentBtn = document.getElementById('postCommentBtn');
+            const originalText = postCommentBtn.textContent;
+            
+            try {
+                postCommentBtn.disabled = true;
+                postCommentBtn.textContent = '⏳ Posting to GitHub...';
+                
+                const issueUrl = document.getElementById('issueUrl').value.trim();
+                const githubToken = document.getElementById('githubToken').value.trim();
+                
+                // Get the diagram
+                const diagramResponse = await fetch('/api/generate-diagram', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        packages: analysisData.packages,
+                        issue: analysisData.issue
+                    })
+                });
+                
+                const diagramData = await diagramResponse.json();
+                
+                // Prepare analysis result with diagram
+                const analysisResult = {
+                    issue: analysisData.issue,
+                    packages: analysisData.packages,
+                    diagram: diagramData.success ? diagramData.diagram : null
+                };
+                
+                const response = await fetch('/api/post-comment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        issue_url: issueUrl,
+                        github_token: githubToken,
+                        analysis_result: analysisResult
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    postCommentBtn.textContent = '✅ Posted!';
+                    postCommentBtn.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                    
+                    // Show success message
+                    const successMsg = document.createElement('div');
+                    successMsg.style.cssText = 'margin-top: 15px; padding: 15px; background: #d4edda; color: #155724; border-radius: 12px; border-left: 4px solid #28a745;';
+                    successMsg.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        Analysis posted to GitHub: <a href="${result.comment_url}" target="_blank" style="color: #155724; font-weight: 600;">View Comment</a>
+                    `;
+                    postCommentBtn.parentElement.appendChild(successMsg);
+                    
+                    setTimeout(() => {
+                        postCommentBtn.style.display = 'none';
+                    }, 3000);
+                } else {
+                    throw new Error(result.error || 'Failed to post comment');
+                }
+                
+            } catch (err) {
+                postCommentBtn.textContent = '❌ Failed';
+                postCommentBtn.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                
+                const errorMsg = document.createElement('div');
+                errorMsg.style.cssText = 'margin-top: 15px; padding: 15px; background: #f8d7da; color: #721c24; border-radius: 12px; border-left: 4px solid #dc3545;';
+                errorMsg.innerHTML = `<strong>❌ Error:</strong> ${err.message}`;
+                postCommentBtn.parentElement.appendChild(errorMsg);
+                
+                setTimeout(() => {
+                    postCommentBtn.textContent = originalText;
+                    postCommentBtn.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                    postCommentBtn.disabled = false;
+                }, 3000);
             }
         }
     </script>

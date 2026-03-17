@@ -1,11 +1,7 @@
-# Liberty Issue Analyzer - Python Dependencies
+# GitHub Issue Analyzer - Minimal MVP Requirements
 
-# MCP Server
+# MCP SDK for creating tools that Bob can use
 mcp>=0.9.0
 
-# Optional: If using anthropic-mcp wrapper
-# anthropic-mcp>=0.1.0
-
-# Note: gh CLI must be installed separately
-# macOS: brew install gh
-# Linux: See https://cli.github.com/
+# No other dependencies needed!
+# Uses built-in Python libraries and GitHub CLI (gh) for GitHub operations

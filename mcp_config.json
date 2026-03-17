@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "github-issue-analyzer": {
+      "command": "py",
+      "args": [
+        "c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/mcp_tool.py"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "your_github_token_here"
+      }
+    }
+  }
+}

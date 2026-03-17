@@ -226,7 +226,7 @@ python --version
 
 See [docs/DEMO.md](./docs/DEMO.md) for the complete demo script.
 
-**Quick Demo:**
+**Quick 5 minute Demo:**
 1. Show GitHub issue
 2. Run: `Bob, analyze this issue: OpenLiberty/open-liberty#28000`
 3. Show generated comment in GitHub

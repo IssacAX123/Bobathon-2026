@@ -56,6 +56,42 @@ class GitHubIssueAnalyzer:
     LIBERTY_PATTERN = re.compile(r'io\.openliberty\.[a-z0-9._]+', re.IGNORECASE)
     IBM_PATTERN = re.compile(r'com\.ibm\.ws\.[a-z0-9._]+', re.IGNORECASE)
     
+    # Keyword-to-package mappings for natural language issues
+    KEYWORD_MAPPINGS = {
+        'ltpa': [
+            ('com.ibm.ws.security.token.ltpa', 0.90, 'LTPA token processing'),
+            ('com.ibm.ws.crypto.ltpakeyutil', 0.95, 'LTPA key generation and encryption'),
+            ('com.ibm.ws.security.token.ltpa.internal', 0.85, 'Internal LTPA implementation')
+        ],
+        'ltpa.keys': [
+            ('com.ibm.ws.crypto.ltpakeyutil', 0.95, 'LTPA key file operations'),
+        ],
+        'securityutility': [
+            ('com.ibm.ws.security.utility', 0.90, 'securityUtility command'),
+        ],
+        'security utility': [
+            ('com.ibm.ws.security.utility', 0.90, 'securityUtility command'),
+        ],
+        'pqc': [
+            ('com.ibm.ws.crypto.ltpakeyutil', 0.85, 'Post-quantum cryptography support'),
+        ],
+        'fips': [
+            ('com.ibm.ws.crypto.ltpakeyutil', 0.80, 'FIPS compliance'),
+        ],
+        'jwt': [
+            ('io.openliberty.security.jwt', 0.90, 'JWT token processing'),
+            ('io.openliberty.security.jwt.internal', 0.85, 'Internal JWT implementation'),
+        ],
+        'jakartasec': [
+            ('io.openliberty.security.jakartasec.3.0.internal', 0.85, 'Jakarta Security 3.0'),
+            ('io.openliberty.security.jakartasec.4.0.internal', 0.85, 'Jakarta Security 4.0'),
+        ],
+        'jakarta security': [
+            ('io.openliberty.security.jakartasec.3.0.internal', 0.85, 'Jakarta Security 3.0'),
+            ('io.openliberty.security.jakartasec.4.0.internal', 0.85, 'Jakarta Security 4.0'),
+        ],
+    }
+    
     # Context keywords that increase confidence
     CONTEXT_KEYWORDS = {
         'error': 1.1,
@@ -200,9 +236,10 @@ class GitHubIssueAnalyzer:
         
         This uses multiple strategies:
         1. Direct regex matching
-        2. Context-aware confidence scoring
-        3. Code block detection
-        4. Stack trace parsing
+        2. Keyword-to-package mapping (for natural language)
+        3. Context-aware confidence scoring
+        4. Code block detection
+        5. Stack trace parsing
         """
         packages = []
         text = f"{issue.title}\n\n{issue.body}"
@@ -222,6 +259,10 @@ class GitHubIssueAnalyzer:
         # Strategy 3: Parse stack traces for additional packages
         stack_trace_packages = self._parse_stack_traces(text)
         packages.extend(stack_trace_packages)
+        
+        # Strategy 4: Keyword-to-package mapping (for natural language issues)
+        keyword_packages = self._find_packages_by_keywords(text)
+        packages.extend(keyword_packages)
         
         # Deduplicate and sort by confidence
         packages = self._deduplicate_packages(packages)
@@ -289,6 +330,37 @@ class GitHubIssueAnalyzer:
             ))
         
         return packages
+    def _find_packages_by_keywords(self, text: str) -> List[Package]:
+        """
+        Find packages based on keyword mappings for natural language issues.
+        
+        This helps identify packages when issues use terms like "LTPA" or 
+        "securityUtility" instead of explicit package names.
+        """
+        packages = []
+        text_lower = text.lower()
+        
+        for keyword, mappings in self.KEYWORD_MAPPINGS.items():
+            if keyword in text_lower:
+                for package_name, confidence, context in mappings:
+                    # Determine package type
+                    if package_name.startswith('io.openliberty'):
+                        pkg_type = 'LIBERTY'
+                    elif package_name.startswith('com.ibm.ws'):
+                        pkg_type = 'IBM'
+                    else:
+                        pkg_type = 'UNKNOWN'
+                    
+                    packages.append(Package(
+                        name=package_name,
+                        confidence=confidence,
+                        context=context,
+                        package_type=pkg_type,
+                        location='inferred'
+                    ))
+        
+        return packages
+    
     
     def _determine_location(self, text: str, position: int) -> str:
         """Determine where in the issue the package was found."""
@@ -374,9 +446,15 @@ def main():
     """CLI entry point for testing."""
     import sys
     
+    # Check for --json-only flag
+    json_only = '--json-only' in sys.argv
+    if json_only:
+        sys.argv.remove('--json-only')
+    
     if len(sys.argv) < 2:
-        print("Usage: python github_issue_analyzer.py <issue_url>")
+        print("Usage: python github_issue_analyzer.py [--json-only] <issue_url>")
         print("Example: python github_issue_analyzer.py https://github.com/OpenLiberty/open-liberty/issues/12345")
+        print("  --json-only: Output only JSON (for piping to diagram_generator.py)")
         sys.exit(1)
     
     issue_url = sys.argv[1]
@@ -385,16 +463,26 @@ def main():
     analyzer = GitHubIssueAnalyzer()
     
     # Analyze issue
-    print(f"Analyzing issue: {issue_url}")
-    print()
+    if not json_only:
+        print(f"Analyzing issue: {issue_url}")
+        print()
     
     result = analyzer.analyze_issue(issue_url)
     
     if not result.success:
-        print(f"❌ Error: {result.error_message}")
+        if json_only:
+            # Output error as JSON for downstream tools
+            print(analyzer.to_json(result))
+        else:
+            print(f"❌ Error: {result.error_message}")
         sys.exit(1)
     
-    # Print results
+    # JSON-only mode: just output JSON and exit
+    if json_only:
+        print(analyzer.to_json(result))
+        sys.exit(0)
+    
+    # Human-readable output
     print(f"✅ Analysis complete in {result.analysis_time_ms}ms")
     print()
     

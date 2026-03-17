@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>diagram.html</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+
+</head>
+
+<body>
+
+<h2 id="component-diagram">Component Diagram</h2>
+<pre class="mermaid"><code>---
+title: Issue #1 - Update OpenLiberty ltpa token processing to handle PQC algor
+---
+graph LR
+    A[com.ibm.ws.crypto.ltpakeyutil]
+    B[com.ibm.ws.security.token.ltpa]
+    C[com.ibm.ws.security.utility]
+    D[token.ltpa.internal]
+    A --&gt;|related| B
+    A --&gt;|related| C
+    A --&gt;|related| D
+    B --&gt;|related| C
+    B --&gt;|uses| D
+    C --&gt;|uses| D
+    style A fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style B fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style C fill:#e8f5e9,stroke:#333,stroke-width:2px
+    style D fill:#e8f5e9,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5</code></pre>
+
+</body>
+</html>

@@ -32,7 +32,7 @@ Open the configuration file and add this MCP server:
     "github-issue-analyzer": {
       "command": "py",
       "args": [
-        "c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/mcp_tool.py"
+        "/path/to/project/src/mcp_tool.py"
       ],
       "env": {
         "GITHUB_TOKEN": "your_github_token_here"
@@ -58,7 +58,7 @@ Add the new server to the existing configuration:
     "github-issue-analyzer": {
       "command": "py",
       "args": [
-        "c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/mcp_tool.py"
+        "/path/to/project/src/mcp_tool.py"
       ],
       "env": {
         "GITHUB_TOKEN": "your_github_token_here"
@@ -93,7 +93,7 @@ Then your config becomes:
     "github-issue-analyzer": {
       "command": "py",
       "args": [
-        "c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/mcp_tool.py"
+        "/path/to/project/src/mcp_tool.py"
       ]
     }
   }
@@ -109,7 +109,7 @@ If you've already run `gh auth login`, you can omit the token entirely:
     "github-issue-analyzer": {
       "command": "py",
       "args": [
-        "c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/mcp_tool.py"
+        "/path/to/project/src/mcp_tool.py"
       ]
     }
   }
@@ -142,7 +142,7 @@ Bob should list `analyze-github-issue` among the available tools.
 
 Try analyzing an issue:
 ```
-Analyze this GitHub issue: https://github.com/IssacAX123/Bobathon-2026/issues/1
+Analyze this GitHub issue: https://github.com/owner/repo/issues/1
 ```
 
 Bob will:
@@ -184,7 +184,7 @@ Bob: 🔍 Analyzing issue...
      - PERSON3_DIAGRAM.md
      
      The analysis has been posted to GitHub!
-     View at: https://github.com/IssacAX123/Bobathon-2026/issues/1
+     View at: https://github.com/owner/repo/issues/1
 ```
 
 ## 🔧 Advanced Configuration

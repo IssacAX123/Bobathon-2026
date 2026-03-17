@@ -148,14 +148,16 @@ Bob: "Run full analysis on https://github.com/OpenLiberty/open-liberty/issues/12
 
 ## Configuration
 
-Bob's MCP configuration is at: `C:/Users/IssacAbraham/.bob/settings/mcp_settings.json`
+Bob's MCP configuration location:
+- **Windows**: `C:/Users/YourUsername/.bob/settings/mcp_settings.json`
+- **Linux/Mac**: `~/.bob/settings/mcp_settings.json`
 
 ```json
 {
   "mcpServers": {
     "github-issue-analyzer": {
       "command": "py",
-      "args": ["c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/main/python/mcp_server.py"],
+      "args": ["/path/to/project/src/main/python/mcp_server.py"],
       "env": {
         "GITHUB_TOKEN": "your_token_here"
       }

@@ -20,7 +20,11 @@ This installs:
 
 Your Bob configuration file is at:
 ```
-C:/Users/IssacAbraham/.bob/settings/mcp_settings.json
+# Windows
+C:/Users/YourUsername/.bob/settings/mcp_settings.json
+
+# Linux/Mac
+~/.bob/settings/mcp_settings.json
 ```
 
 **Current Configuration:**
@@ -30,7 +34,7 @@ C:/Users/IssacAbraham/.bob/settings/mcp_settings.json
     "github-issue-analyzer": {
       "command": "py",
       "args": [
-        "c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/main/python/mcp_server.py"
+        "/path/to/project/src/main/python/mcp_server.py"
       ],
       "env": {
         "GITHUB_TOKEN": "your_token_here"
@@ -95,7 +99,7 @@ Then restart Bob.
      "mcpServers": {
        "github-issue-analyzer": {
          "command": "C:/Python312/python.exe",
-         "args": ["c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/main/python/mcp_server.py"],
+         "args": ["/path/to/project/src/main/python/mcp_server.py"],
          "env": {
            "GITHUB_TOKEN": "your_token_here"
          }
@@ -108,14 +112,18 @@ Then restart Bob.
    
    Verify the path exists:
    ```bash
-   dir "c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/main/python/mcp_server.py"
+   # Windows
+   dir "/path/to/project/src/main/python/mcp_server.py"
+   
+   # Linux/Mac
+   ls -la /path/to/project/src/main/python/mcp_server.py
    ```
 
 4. **Import errors in MCP server**
    
    Test the server manually:
    ```bash
-   cd c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/main/python
+   cd /path/to/project/src/main/python
    python mcp_server.py
    ```
    
@@ -202,11 +210,11 @@ Expected: Complete analysis with diagram (preview mode, not posted)
     "github-issue-analyzer": {
       "command": "C:/Python312/python.exe",
       "args": [
-        "c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/main/python/mcp_server.py"
+        "/path/to/project/src/main/python/mcp_server.py"
       ],
       "env": {
         "GITHUB_TOKEN": "ghp_your_token_here",
-        "PYTHONPATH": "c:/Users/IssacAbraham/Documents/misc/2026/Bobathon/Bobathon-2026/src/main/python"
+        "PYTHONPATH": "/path/to/project/src/main/python"
       },
       "timeout": 30000
     }
@@ -219,7 +227,7 @@ Expected: Complete analysis with diagram (preview mode, not posted)
 ⚠️ **Important**: The `.bob/` directory is in `.gitignore` to prevent committing your GitHub token!
 
 **Never commit:**
-- `C:/Users/IssacAbraham/.bob/settings/mcp_settings.json`
+- `.bob/settings/mcp_settings.json` (in your home directory)
 - Any file containing your GitHub token
 
 **Safe to commit:**

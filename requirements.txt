@@ -1,5 +1,11 @@
 # Liberty Issue Analyzer - Python Dependencies
 
+# Core dependencies
+requests>=2.31.0
+
+# Web UI (Flask)
+Flask>=3.0.0
+
 # MCP Server
 mcp>=0.9.0
 

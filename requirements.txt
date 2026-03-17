@@ -2,6 +2,7 @@
 
 # Core dependencies
 requests>=2.31.0
+pyyaml>=6.0.1
 
 # Web UI (Flask)
 Flask>=3.0.0

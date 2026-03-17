@@ -1,0 +1,44 @@
+{
+  "success": true,
+  "analysis_time_ms": 447,
+  "error_message": null,
+  "issue": {
+    "number": 1,
+    "title": "Update OpenLiberty ltpa token processing to handle PQC algorithms",
+    "body": "Open Liberty has support for FIPS-140, but needs support for FIPS 203, 204 and 205 - the PQC algorithms from NIST for post quantum compliance.\r\n\r\nAcceptance criteria.\r\n\r\nGiven that I am using Open Liberty's securityUtility to generate LTPA keys\r\nOR I Open Liberty is automatically generating LTPA keys upon startup\r\nWhen I examine the generated ltpa.keys file\r\nIt should contain keys which support PQC algorithms.\r\n\r\nGiven that I am using Open Liberty's securityUtility to generate LTPA keys\r\nOR I Open Liberty is automatically generating LTPA keys upon startup\r\nWhen I examine the generated ltpa.keys file\r\nIt should contain keys which support existing non-PQC compliant algorithms (i.e. support Hybrid mode).\r\n\r\nGiven that an Open Liberty server is starting\r\nWhen it loads the ltpa.keys file\r\nIt should decrypt keys generated with PQC algorithms.",
+    "labels": [],
+    "url": "https://github.ibm.com/David-Webster1/jakarta_security/issues/1",
+    "created_at": "2026-03-17T13:01:16Z",
+    "author": "David-Webster1"
+  },
+  "packages": [
+    {
+      "name": "com.ibm.ws.crypto.ltpakeyutil",
+      "confidence": 0.95,
+      "context": "LTPA key generation and encryption",
+      "package_type": "IBM",
+      "location": "inferred"
+    },
+    {
+      "name": "com.ibm.ws.security.token.ltpa",
+      "confidence": 0.9,
+      "context": "LTPA token processing",
+      "package_type": "IBM",
+      "location": "inferred"
+    },
+    {
+      "name": "com.ibm.ws.security.utility",
+      "confidence": 0.9,
+      "context": "securityUtility command",
+      "package_type": "IBM",
+      "location": "inferred"
+    },
+    {
+      "name": "com.ibm.ws.security.token.ltpa.internal",
+      "confidence": 0.85,
+      "context": "Internal LTPA implementation",
+      "package_type": "IBM",
+      "location": "inferred"
+    }
+  ]
+}

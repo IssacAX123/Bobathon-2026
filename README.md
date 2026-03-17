@@ -265,7 +265,7 @@ See [docs/DEMO.md](./docs/DEMO.md) for the complete demo script.
 
 ---
 
-## 👥 Team
+## 👥 Team (dave, deval, hannah, issac)
 
 - Person 1: GitHub Integration
 - Person 2: Package Analysis

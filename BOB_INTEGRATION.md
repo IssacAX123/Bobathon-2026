@@ -32,7 +32,7 @@ Open the configuration file and add this MCP server:
     "github-issue-analyzer": {
       "command": "py",
       "args": [
-        "/path/to/project/src/mcp_tool.py"
+        "/path/to/project/src/main/python/mcp_server.py"
       ],
       "env": {
         "GITHUB_TOKEN": "your_github_token_here"
@@ -42,7 +42,7 @@ Open the configuration file and add this MCP server:
 }
 ```
 
-**Important:** Replace the path with your actual path to `mcp_tool.py`
+**Important:** Replace `/path/to/project` with your actual project path
 
 ### If You Already Have Other MCP Servers
 
@@ -58,7 +58,7 @@ Add the new server to the existing configuration:
     "github-issue-analyzer": {
       "command": "py",
       "args": [
-        "/path/to/project/src/mcp_tool.py"
+        "/path/to/project/src/main/python/mcp_server.py"
       ],
       "env": {
         "GITHUB_TOKEN": "your_github_token_here"
@@ -93,7 +93,7 @@ Then your config becomes:
     "github-issue-analyzer": {
       "command": "py",
       "args": [
-        "/path/to/project/src/mcp_tool.py"
+        "/path/to/project/src/main/python/mcp_server.py"
       ]
     }
   }
@@ -109,7 +109,7 @@ If you've already run `gh auth login`, you can omit the token entirely:
     "github-issue-analyzer": {
       "command": "py",
       "args": [
-        "/path/to/project/src/mcp_tool.py"
+        "/path/to/project/src/main/python/mcp_server.py"
       ]
     }
   }
@@ -136,55 +136,52 @@ In Bob's chat, type:
 What tools do you have available?
 ```
 
-Bob should list `analyze-github-issue` among the available tools.
+Bob should list these 5 tools:
+- `fetch-github-issue`
+- `identify-liberty-packages`
+- `generate-component-diagram`
+- `format-analysis-comment`
+- `post-github-comment`
 
-### Test the Tool
+### Test the Workflow
 
 Try analyzing an issue:
 ```
-Analyze this GitHub issue: https://github.com/owner/repo/issues/1
+Analyze this issue: https://github.com/OpenLiberty/open-liberty/issues/12345
 ```
 
-Bob will:
-1. Use the `analyze-github-issue` tool
-2. Fetch the issue
-3. Analyze your codebase
-4. Generate explanation and diagram
-5. Post the analysis to GitHub
-6. Show you a summary
+Bob will guide you through:
+1. Fetching the issue
+2. Identifying Liberty packages
+3. Generating a diagram (if you want)
+4. Formatting the analysis
+5. Posting to GitHub (with preview option)
 
 ## 💬 How to Use with Bob
 
 Once integrated, you can use natural language commands:
 
-### Basic Analysis
+### Step-by-Step Analysis
 ```
-You: "Analyze issue #1 in my repository"
-You: "What files are affected by issue 123?"
-You: "Help me understand this issue: https://github.com/owner/repo/issues/42"
+You: "Analyze this issue: https://github.com/OpenLiberty/open-liberty/issues/12345"
+
+Bob: [Fetches issue] "Found issue about LTPA token validation..."
+Bob: [Identifies packages] "Found io.openliberty.security.ltpa (95% confidence)"
+Bob: "Would you like me to generate a diagram?"
+You: "Yes"
+Bob: [Generates diagram] "Here's the component diagram..."
+Bob: "Would you like me to post this to GitHub?"
+You: "Preview first"
+Bob: [Formats comment] "Here's what will be posted..."
+You: "Post it"
+Bob: [Posts to GitHub] "✅ Posted! View at: https://github.com/..."
 ```
 
-### With Options
+### Quick Commands
 ```
-You: "Analyze this issue but don't post to GitHub: https://github.com/owner/repo/issues/5"
-```
-
-### Bob's Response
-```
-Bob: 🔍 Analyzing issue...
-     
-     ✅ Analysis Complete and Posted!
-     
-     Issue: #1 - Story 1: Implement GitHub Issue Fetching
-     Relevant Files: 5
-     - src/main/python/github_issue_analyzer.py
-     - docs/user-stories/story-1-fetch-analyze.md
-     - PERSON1_GITHUB.md
-     - PERSON2_ANALYZER.md
-     - PERSON3_DIAGRAM.md
-     
-     The analysis has been posted to GitHub!
-     View at: https://github.com/owner/repo/issues/1
+You: "What Liberty packages are affected by issue #12345?"
+You: "Show me a diagram for this issue"
+You: "Post the analysis to GitHub"
 ```
 
 ## 🔧 Advanced Configuration

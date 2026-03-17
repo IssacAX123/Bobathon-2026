@@ -79,26 +79,11 @@ Should show: `✓ Logged in to github.com`
 
 ## 💻 Usage
 
-### Standalone Mode (Testing)
+### Bob Integration (MCP Mode) - Recommended
 
-```bash
-# Basic usage (uses gh CLI auth or environment variable)
-py src/mcp_server.py https://github.com/owner/repo/issues/123
+See **BOB_MCP_SETUP.md** for complete setup instructions.
 
-# With explicit token
-set GITHUB_TOKEN=ghp_your_token_here
-py src/mcp_server.py https://github.com/owner/repo/issues/123
-```
-
-The script will:
-1. Fetch the issue
-2. Analyze your codebase
-3. Generate explanation and diagram
-4. Ask if you want to post to GitHub
-
-### Bob Integration (MCP Mode)
-
-#### Step 1: Configure Bob
+#### Quick Configuration
 
 Add to Bob's MCP configuration file:
 
@@ -108,7 +93,7 @@ Add to Bob's MCP configuration file:
   "mcpServers": {
     "github-issue-analyzer": {
       "command": "py",
-      "args": ["C:/path/to/Bobathon-2026/src/mcp_tool.py"],
+      "args": ["/path/to/project/src/main/python/mcp_server.py"],
       "env": {
         "GITHUB_TOKEN": "ghp_your_token_here"
       }
@@ -123,7 +108,7 @@ Add to Bob's MCP configuration file:
   "mcpServers": {
     "github-issue-analyzer": {
       "command": "python3",
-      "args": ["/path/to/Bobathon-2026/src/mcp_tool.py"],
+      "args": ["/path/to/project/src/main/python/mcp_server.py"],
       "env": {
         "GITHUB_TOKEN": "ghp_your_token_here"
       }
@@ -132,39 +117,37 @@ Add to Bob's MCP configuration file:
 }
 ```
 
-**Alternative (using system environment variable):**
-```json
-{
-  "mcpServers": {
-    "github-issue-analyzer": {
-      "command": "py",
-      "args": ["C:/path/to/Bobathon-2026/src/mcp_tool.py"]
-    }
-  }
-}
-```
-(Token will be read from system GITHUB_TOKEN or GH_TOKEN environment variable)
+#### Use with Bob
 
-#### Step 2: Use with Bob
+Bob now has 5 granular tools for step-by-step analysis:
 
 ```
-You: "Bob, analyze this issue: https://github.com/owner/repo/issues/123"
+You: "Analyze this issue: https://github.com/OpenLiberty/open-liberty/issues/12345"
 
-Bob: [Uses analyze-github-issue tool]
-     ✅ Analysis Complete and Posted!
+Bob: [Uses fetch-github-issue]
+     Shows issue details...
      
-     Issue: #123 - Fix login bug
-     Relevant Files: 3
-     - src/auth/login.py
-     - src/utils/validation.py
-     - tests/test_login.py
+Bob: [Uses identify-liberty-packages]
+     Found 3 packages with confidence scores...
+     
+Bob: "Would you like me to generate a diagram?"
+You: "Yes"
+
+Bob: [Uses generate-component-diagram]
+     Shows Mermaid diagram...
+     
+Bob: "Would you like me to post this to GitHub?"
+You: "Preview first"
+
+Bob: [Uses format-analysis-comment with dry_run=true]
+     Shows formatted comment preview...
+     
+You: "Post it"
+Bob: [Uses post-github-comment]
+     ✅ Posted to GitHub!
 ```
 
-**With explicit token in command:**
-```
-You: "Bob, analyze this issue with my token: https://github.com/owner/repo/issues/123"
-     Token: ghp_your_token_here
-```
+See **MCP_USAGE_EXAMPLES.md** for more examples.
 
 ## 🔒 Security Best Practices
 
@@ -194,17 +177,27 @@ gh issue view https://github.com/owner/repo/issues/1 --json number,title
 ```
 Expected: JSON output with issue data
 
-### Test 3: Run Analyzer (Dry Run)
-```bash
-py src/mcp_server.py https://github.com/owner/repo/issues/1
-```
-When prompted, type `n` to skip posting. You should see the analysis preview.
+### Test 3: Test with Bob
 
-### Test 4: Full Run (Posts to GitHub)
-```bash
-py src/mcp_server.py https://github.com/owner/repo/issues/1
+Ask Bob:
 ```
-When prompted, type `y` to post. Check the issue on GitHub for the comment.
+What tools do you have available?
+```
+
+You should see 5 tools:
+- fetch-github-issue
+- identify-liberty-packages
+- generate-component-diagram
+- format-analysis-comment
+- post-github-comment
+
+### Test 4: Analyze an Issue
+
+```
+Analyze this issue: https://github.com/OpenLiberty/open-liberty/issues/12345
+```
+
+Bob will guide you through the step-by-step analysis.
 
 ## 🐛 Troubleshooting
 
@@ -296,25 +289,20 @@ The analyzer posts a comment with:
 ## 🎯 Use Cases
 
 ### For Individual Developers
-```bash
-# Quick analysis of any issue
-py src/mcp_server.py https://github.com/myorg/myrepo/issues/42
-```
+Ask Bob to analyze issues step-by-step, giving you full control over each stage.
 
 ### For Teams Using Bob
 ```
 Team Member: "Bob, analyze issue #42"
-Bob: [Analyzes and posts to GitHub]
-Team: [Sees analysis comment on issue]
+Bob: [Guides through analysis step-by-step]
+Team: [Reviews each step before posting]
 ```
 
-### For CI/CD Pipelines
-```bash
-# Analyze new issues automatically
-gh issue list --state open --limit 10 | while read issue; do
-  py src/mcp_server.py $issue
-done
-```
+### For OpenLiberty Contributors
+Bob can identify which Liberty packages are affected by an issue, helping with:
+- Package ownership assignment
+- Impact analysis
+- Technical documentation
 
 ## 🔄 Updating
 

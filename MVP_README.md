@@ -33,19 +33,7 @@ pip install mcp
 
 ### Usage
 
-#### Option 1: Standalone CLI (Testing)
-
-```bash
-python src/mcp_server.py https://github.com/owner/repo/issues/123
-```
-
-This will:
-- Fetch the issue
-- Analyze your codebase
-- Show you the analysis
-- Ask if you want to post it to GitHub
-
-#### Option 2: As MCP Tool (With Bob)
+#### As MCP Tool (With Bob) - Recommended
 
 1. **Configure Bob** to use this MCP server (add to Bob's config):
 
@@ -54,29 +42,45 @@ This will:
   "mcpServers": {
     "github-issue-analyzer": {
       "command": "python",
-      "args": ["src/mcp_tool.py"],
-      "cwd": "/path/to/this/repo"
+      "args": ["src/main/python/mcp_server.py"],
+      "cwd": "/path/to/this/repo",
+      "env": {
+        "GITHUB_TOKEN": "your_token_here"
+      }
     }
   }
 }
 ```
 
-2. **Use with Bob**:
+2. **Use with Bob** - Step-by-step workflow:
 
 ```
-You: "Bob, analyze this issue: https://github.com/owner/repo/issues/123"
+You: "Analyze this issue: https://github.com/OpenLiberty/open-liberty/issues/12345"
 
-Bob: [Uses analyze-github-issue tool]
-     ✅ Analysis Complete and Posted!
+Bob: [Uses fetch-github-issue]
+     Shows issue details...
      
-     Issue: #123 - Fix login bug
-     Relevant Files: 3
-     - src/auth/login.py
-     - src/utils/validation.py
-     - tests/test_login.py
+Bob: [Uses identify-liberty-packages]
+     Found packages: io.openliberty.security.ltpa (95% confidence)
      
-     The analysis has been posted to GitHub!
+Bob: "Would you like a diagram?"
+You: "Yes"
+
+Bob: [Uses generate-component-diagram]
+     Shows Mermaid diagram...
+     
+Bob: "Post to GitHub?"
+You: "Preview first"
+
+Bob: [Uses format-analysis-comment]
+     Shows formatted preview...
+     
+You: "Post it"
+Bob: [Uses post-github-comment]
+     ✅ Posted!
 ```
+
+See **BOB_MCP_SETUP.md** for complete setup instructions.
 
 ## 📊 Example Output
 
@@ -195,38 +199,32 @@ Uses GitHub CLI (`gh issue comment`) to post the analysis as a comment on the is
 
 ### Customization
 
-Edit `src/mcp_server.py` to customize:
-- Number of relevant files to find (default: 5)
-- File types to search (default: .py, .java, .js, .ts, .md)
-- Keyword extraction logic
-- Explanation template
-- Diagram styling
+Edit `src/main/python/mcp_server.py` to customize tool behavior.
 
-## 📝 MCP Tool Specification
+Edit `config/package_keywords.yaml` to add more Liberty package mappings.
 
-**Tool Name:** `analyze-github-issue`
+## 📝 MCP Tools Available
 
-**Parameters:**
-- `issue_url` (required): GitHub issue URL
-- `post_to_github` (optional): Whether to post analysis (default: true)
+Bob has 5 granular tools:
 
-**Returns:**
-- Success message with analysis summary
-- List of relevant files
-- Link to posted comment (if posted)
+1. **fetch-github-issue** - Get issue details
+2. **identify-liberty-packages** - Find affected packages
+3. **generate-component-diagram** - Create Mermaid diagram
+4. **format-analysis-comment** - Format comprehensive comment
+5. **post-github-comment** - Post to GitHub (dry-run by default)
+
+See **MCP_USAGE_EXAMPLES.md** for detailed examples.
 
 ## 🧪 Testing
 
-Test with a real issue:
+Test with Bob:
 
-```bash
-# Dry run (doesn't post to GitHub)
-python src/mcp_server.py https://github.com/owner/repo/issues/123
-# When prompted, type 'n' to skip posting
+```
+You: "What tools do you have available?"
+Bob: Lists 5 tools...
 
-# Full run (posts to GitHub)
-python src/mcp_server.py https://github.com/owner/repo/issues/123
-# When prompted, type 'y' to post
+You: "Analyze this issue: https://github.com/OpenLiberty/open-liberty/issues/12345"
+Bob: Guides you through step-by-step analysis...
 ```
 
 ## 🚨 Troubleshooting
@@ -252,24 +250,24 @@ Check permissions: `gh auth status`
 - 📊 Diagrams render correctly in GitHub
 - 💬 Comments are well-formatted and helpful
 
-## 🎉 What Makes This MVP Special
+## 🎉 What Makes This Implementation Special
 
-✅ **Simple** - Just 330 lines of Python code
-✅ **Fast** - Analyzes issues in seconds
-✅ **Practical** - Actually posts to GitHub
-✅ **Visual** - Includes Mermaid diagrams
-✅ **Minimal** - Only needs Python and GitHub CLI
-✅ **Extensible** - Easy to add more features
+✅ **Granular Tools** - Bob orchestrates 5 focused tools
+✅ **Step-by-Step** - Full visibility and control at each stage
+✅ **OpenLiberty Focus** - Specialized for Liberty package analysis
+✅ **Async Execution** - No timeouts with proper async handling
+✅ **Dry-Run Support** - Preview before posting
+✅ **Comprehensive Output** - Detailed technical documentation
 
-## 🚀 Next Steps (Post-MVP)
+## 🚀 Current Features
 
-After validating this MVP, consider adding:
-- AI-powered file relevance scoring
-- Code snippet extraction
-- Dependency analysis
-- Historical issue patterns
-- Multi-issue analysis
-- Custom templates
+- ✅ GitHub issue fetching
+- ✅ Liberty package identification with confidence scores
+- ✅ Mermaid diagram generation
+- ✅ Comprehensive technical documentation
+- ✅ LTPA security explanations
+- ✅ Configuration examples
+- ✅ Troubleshooting guides
 
 ## 📄 License
 

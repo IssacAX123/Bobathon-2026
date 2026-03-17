@@ -1,0 +1,11 @@
+# Liberty Issue Analyzer - Python Dependencies
+
+# MCP Server
+mcp>=0.9.0
+
+# Optional: If using anthropic-mcp wrapper
+# anthropic-mcp>=0.1.0
+
+# Note: gh CLI must be installed separately
+# macOS: brew install gh
+# Linux: See https://cli.github.com/

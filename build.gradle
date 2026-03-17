@@ -1,0 +1,152 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'jacoco'
+    id 'checkstyle'
+}
+
+group = 'com.ibm.liberty'
+version = '1.0.0-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // HTTP Client
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    
+    // JSON Processing
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+    
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'ch.qos.logback:logback-classic:1.4.11'
+    
+    // Utilities
+    implementation 'com.google.guava:guava:32.1.2-jre'
+    implementation 'org.apache.commons:commons-lang3:3.13.0'
+    
+    // Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.mockito:mockito-core:5.5.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.5.0'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+}
+
+application {
+    mainClass = 'com.ibm.liberty.analyzer.Main'
+}
+
+test {
+    useJUnitPlatform()
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+    
+    // Fail build on test failures
+    ignoreFailures = false
+    
+    // Generate test report
+    reports {
+        html.required = true
+        junitXml.required = true
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.10"
+}
+
+jacocoTestReport {
+    dependsOn test
+    
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+    
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/model/**',
+                '**/Main.class'
+            ])
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.80  // 80% coverage target
+            }
+        }
+    }
+}
+
+checkstyle {
+    toolVersion = '10.12.3'
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    ignoreFailures = false
+    maxWarnings = 0
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.required = false
+        html.required = true
+    }
+}
+
+// Custom task for integration tests
+task integrationTest(type: Test) {
+    description = 'Runs integration tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+    
+    shouldRunAfter test
+}
+
+// Custom task to run all checks
+task verify {
+    description = 'Runs all verification tasks'
+    group = 'verification'
+    
+    dependsOn test, integrationTest, jacocoTestReport, checkstyleMain, checkstyleTest
+}
+
+// Task to print project info
+task projectInfo {
+    doLast {
+        println "Project: ${project.name}"
+        println "Version: ${project.version}"
+        println "Java Version: ${sourceCompatibility}"
+        println "Build Directory: ${buildDir}"
+    }
+}
+
+// Clean task enhancement
+clean {
+    delete 'out'
+    delete '.gradle'
+}
+
+// Wrapper configuration
+wrapper {
+    gradleVersion = '8.4'
+    distributionType = Wrapper.DistributionType.BIN
+}
+
+// Made with Bob

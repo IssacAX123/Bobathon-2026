@@ -1,236 +1,126 @@
-# Liberty Issue Analyzer - MCP Tool
+# GitHub Issue Analyzer for OpenLiberty
 
-**Hackathon Project:** Automated GitHub issue analysis for OpenLiberty
+**Bobathon 2026 Project** - Automated GitHub issue analysis with MCP integration for Bob IDE
 
-Automatically fetch GitHub issues, identify Liberty packages, generate visual diagrams, and post formatted analysis comments.
+Automatically fetch GitHub issues, identify Liberty packages, generate visual diagrams, and post comprehensive analysis comments.
 
 ---
 
-## 🚀 Quick Start (5 minutes)
+## 🚀 Quick Start
 
-```bash
-# 1. Clone repository
-git clone <your-repo-url>
-cd liberty-analyzer
+### For Bob IDE (MCP Integration)
 
-# 2. Install dependencies
-pip install -r requirements.txt
+1. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-# 3. Verify gh CLI authentication
-gh auth status
+2. **Configure Bob**
+   - See [BOB_MCP_SETUP.md](./BOB_MCP_SETUP.md) for complete setup
 
-# 4. Run tests
-python tests/test_integration.py
+3. **Restart Bob**
+   - Close Bob completely
+   - Reopen Bob
+   - Tools will be available
 
-# 5. Start MCP server
-python src/server.py
-```
+4. **Use with Bob**
+   ```
+   Ask Bob: "Analyze this issue: https://github.com/OpenLiberty/open-liberty/issues/12345"
+   ```
+
+### For Flask Web UI
+
+1. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Start Web Server**
+   ```bash
+   # Windows
+   start_web_ui.bat
+   
+   # Linux/Mac
+   ./start_web_ui.sh
+   ```
+
+3. **Open Browser**
+   - Navigate to http://localhost:5000
+   - Enter issue URL and analyze
 
 ---
 
 ## 📁 Project Structure
 
 ```
-liberty-analyzer/
-├── src/
-│   ├── server.py              # MCP server (Person 4)
-│   ├── github_client.py       # GitHub API wrapper (Person 1)
-│   ├── package_analyzer.py    # Package extraction (Person 2)
-│   └── diagram_generator.py   # Mermaid diagrams (Person 3)
-├── tests/
-│   └── test_integration.py    # Integration tests
-├── docs/
-│   └── DEMO.md               # Demo script
-├── IMPLEMENTATION_GUIDE.md   # Main guide
-├── PERSON1_GITHUB.md         # Person 1 instructions
-├── PERSON2_ANALYZER.md       # Person 2 instructions
-├── PERSON3_DIAGRAM.md        # Person 3 instructions
-├── PERSON4_SERVER.md         # Person 4 instructions
-└── requirements.txt          # Python dependencies
+Bobathon-2026/
+├── src/main/python/
+│   ├── mcp_server.py              # MCP server for Bob (5 granular tools)
+│   ├── github_issue_analyzer.py   # Issue fetching & package analysis
+│   ├── diagram_generator.py       # Mermaid diagram generation
+│   ├── comment_poster.py          # GitHub comment posting
+│   ├── web_app.py                 # Flask web UI
+│   └── templates/
+│       └── index.html             # Web UI template
+├── docs/                          # Documentation
+├── BOB_MCP_SETUP.md              # Bob configuration guide
+├── MCP_INTEGRATION.md            # MCP architecture docs
+├── MCP_USAGE_EXAMPLES.md         # Usage examples for Bob
+├── VERIFY_UI.md                  # Flask UI verification
+├── requirements.txt              # Python dependencies
+└── README.md                     # This file
 ```
 
 ---
 
-## 👥 Team Assignments
+## 🎯 Features
 
-| Person | Role | Files | Time |
-|--------|------|-------|------|
-| Person 1 | GitHub Integration | `github_client.py` | Hour 1-2 |
-| Person 2 | Package Analysis | `package_analyzer.py` | Hour 1-2 |
-| Person 3 | Diagram Generation | `diagram_generator.py` | Hour 1-2 |
-| Person 4 | MCP Server & Demo | `server.py`, `DEMO.md` | Hour 1-3 |
+### MCP Tools for Bob (Step-by-Step Workflow)
 
-**Read your assigned guide:**
-- Person 1: [PERSON1_GITHUB.md](./PERSON1_GITHUB.md)
-- Person 2: [PERSON2_ANALYZER.md](./PERSON2_ANALYZER.md)
-- Person 3: [PERSON3_DIAGRAM.md](./PERSON3_DIAGRAM.md)
-- Person 4: [PERSON4_SERVER.md](./PERSON4_SERVER.md)
+Bob has access to 5 granular tools:
 
----
+1. **fetch-github-issue** - Get issue details (title, body, labels)
+2. **identify-liberty-packages** - Find Liberty packages in text
+3. **generate-component-diagram** - Create Mermaid diagram
+4. **format-analysis-comment** - Format comprehensive comment
+5. **post-github-comment** - Post to GitHub (dry-run by default)
 
-## ⏱️ 3-Hour Timeline
+### Flask Web UI
 
-### Hour 1: Core Components (Parallel)
-- Everyone implements their assigned module
-- Test modules independently
-- **Check-in at 0:50** - "Module complete?"
+- Visual interface for issue analysis
+- Real-time package identification
+- Interactive diagram display
+- One-click analysis
 
-### Hour 2: Integration
-- Person 4 integrates all modules
-- Everyone helps with testing
-- First demo rehearsal
-- **Check-in at 1:30** - "Integration working?"
+### Production Pipeline
 
-### Hour 3: Demo Prep
-- Final testing with real issues
-- Create backup materials (video, screenshots)
-- Demo rehearsal #2
-- **Check-in at 2:40** - "Demo ready?"
-
----
-
-## 🎯 Usage
-
-### As MCP Tool (in Bob)
-
-```
-User: Bob, analyze this issue: OpenLiberty/open-liberty#28000
-```
-
-Bob will:
-1. Fetch the issue from GitHub
-2. Identify Liberty packages
-3. Generate a Mermaid diagram
-4. Post formatted analysis as comment
-5. Add "bot-analyzed" label
-
-### Command Line Testing
-
-```bash
-# Test without posting comment (dry run)
-python tests/test_integration.py
-
-# Test individual modules
-python tests/test_github_client.py
-python tests/test_package_analyzer.py
-python tests/test_diagram_generator.py
-```
-
----
-
-## 📊 Example Output
-
-```markdown
-## 🤖 Automated Analysis by Bob
-
-**Issue:** #28000 - MicroProfile Config feature issue
-**Analyzed:** 2026-03-17 12:00 UTC
-
-### 📦 Identified Liberty Packages
-
-- 🟢 `io.openliberty.microprofile.config` (confidence: 90%, mentioned 3x)
-- 🟡 `com.ibm.ws.config` (confidence: 65%, mentioned 2x)
-- 🟠 `com.ibm.ws.logging` (confidence: 45%, mentioned 1x)
-
-**Total:** 3 package(s) identified
-
-### 📊 Component Diagram
-
-```mermaid
-graph TD
-    Issue["Issue #28000<br/>MicroProfile Config..."]
-    P0["io.openliberty...config<br/>(90% confidence)"]
-    P1["com.ibm.ws.config<br/>(65% confidence)"]
-    Issue ==> P0
-    Issue --> P1
-```
-
----
-*Generated by Liberty Issue Analyzer MCP Tool*
-```
-
----
-
-## 🧪 Testing
-
-### Test Issues
-
-Use these real OpenLiberty issues for testing:
-
-```python
-TEST_ISSUES = [
-    "OpenLiberty/open-liberty#28000",
-    "OpenLiberty/open-liberty#27500",
-    "OpenLiberty/open-liberty#27000"
-]
-```
-
-### Success Criteria
-
-- [ ] Analysis completes in <15 seconds
-- [ ] Identifies packages with >80% accuracy
-- [ ] Diagram renders in GitHub
-- [ ] Comment formatting looks professional
-- [ ] Handles errors gracefully
-
----
-
-## 🚨 Troubleshooting
-
-### "gh: command not found"
-```bash
-# macOS
-brew install gh
-
-# Linux
-# See: https://cli.github.com/
-```
-
-### "authentication required"
-```bash
-gh auth login
-# Follow prompts
-```
-
-### "Module not found"
-```bash
-# Ensure you're in project root
-cd liberty-analyzer
-
-# Reinstall dependencies
-pip install -r requirements.txt
-```
-
-### MCP server won't start
-```bash
-# Check MCP installation
-pip install --upgrade mcp anthropic-mcp
-
-# Verify Python version (3.9+)
-python --version
-```
+- GitHub API integration via `requests`
+- YAML-based keyword mapping
+- Confidence scoring
+- Mermaid diagram generation
+- Comprehensive GitHub comments with:
+  - Package analysis
+  - Component diagrams
+  - Technical deep-dives
+  - Code suggestions
+  - Test recommendations
 
 ---
 
 ## 📚 Documentation
 
-- [Implementation Guide](./IMPLEMENTATION_GUIDE.md) - Overall plan
-- [Demo Script](./docs/DEMO.md) - 5-minute demo flow
-- [MCP Documentation](https://modelcontextprotocol.io/docs)
-- [gh CLI Reference](https://cli.github.com/manual/)
-- [Mermaid Syntax](https://mermaid.js.org/syntax/flowchart.html)
+### Setup & Configuration
+- **[BOB_MCP_SETUP.md](./BOB_MCP_SETUP.md)** - Complete Bob setup guide ⭐ START HERE
+- **[VERIFY_UI.md](./VERIFY_UI.md)** - Verify Flask UI still works
 
----
+### Usage & Workflow
+- **[MCP_USAGE_EXAMPLES.md](./MCP_USAGE_EXAMPLES.md)** - How Bob uses the tools
+- **[MCP_INTEGRATION.md](./MCP_INTEGRATION.md)** - Architecture details
 
-## 🎬 Demo
-
-See [docs/DEMO.md](./docs/DEMO.md) for the complete demo script.
-
-**Quick 5 minute Demo:**
-1. Show GitHub issue
-2. Run: `Bob, analyze this issue: OpenLiberty/open-liberty#28000`
-3. Show generated comment in GitHub
-4. Highlight automated features
+### Original Hackathon Docs
+- [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) - Original plan
+- [QUICK_START.md](./QUICK_START.md) - Quick start guide
+- [QUICK_START_WEB_UI.md](./QUICK_START_WEB_UI.md) - Web UI guide
 
 ---
 
@@ -238,59 +128,220 @@ See [docs/DEMO.md](./docs/DEMO.md) for the complete demo script.
 
 - **Language:** Python 3.9+
 - **MCP:** Model Context Protocol SDK
-- **GitHub:** gh CLI
+- **Web Framework:** Flask 3.0+
+- **GitHub API:** requests library
 - **Diagrams:** Mermaid
-- **Testing:** Built-in unittest
+- **Config:** YAML (pyyaml)
 
 ---
 
-## 📈 Success Metrics
+## 💻 Usage Examples
 
-- ✅ Speed: <15 seconds per analysis
-- ✅ Accuracy: >80% package identification
-- ✅ Visual: Diagram renders in GitHub
-- ✅ Reliability: Handles 3 test issues without errors
-- ✅ Demo: Runs smoothly in 5 minutes
+### With Bob (Recommended)
+
+```
+User: "Analyze this issue: https://github.com/OpenLiberty/open-liberty/issues/12345"
+
+Bob: [Uses fetch-github-issue]
+Bob: "I fetched issue #12345 about LTPA token validation.
+      Let me identify the Liberty packages..."
+
+Bob: [Uses identify-liberty-packages]
+Bob: "Found 3 packages:
+      - io.openliberty.security.ltpa (95%)
+      - com.ibm.ws.crypto.ltpakeyutil (90%)
+      - io.openliberty.security.utility (85%)
+      
+      Want a diagram?"
+
+User: "Yes"
+
+Bob: [Uses generate-component-diagram]
+Bob: "Here's the diagram showing relationships:
+      [mermaid code]
+      
+      Should I post this to GitHub?"
+
+User: "Preview first"
+
+Bob: [Uses format-analysis-comment]
+Bob: "Here's what would be posted:
+      [shows preview]
+      
+      Ready to post?"
+
+User: "Yes"
+
+Bob: [Uses post-github-comment with dry_run=true]
+Bob: "Dry run successful. Post for real?"
+
+User: "Yes"
+
+Bob: [Uses post-github-comment with dry_run=false]
+Bob: "✅ Posted! https://github.com/.../issues/12345#comment-456"
+```
+
+### With Flask UI
+
+1. Open http://localhost:5000
+2. Enter issue URL
+3. Click "Analyze Issue"
+4. View results with diagram
+5. Optionally post to GitHub
 
 ---
 
-## 🚀 Future Enhancements (Post-Hackathon)
+## 🧪 Testing
 
-- [ ] Git history analysis
-- [ ] Multi-issue pattern detection
-- [ ] Custom analysis templates
-- [ ] Caching for performance
-- [ ] Advanced relationship mapping
-- [ ] Integration with CI/CD
+### Test MCP Server
+
+```bash
+cd src/main/python
+python mcp_server.py
+```
+
+Should output:
+```
+Starting GitHub Issue Analyzer MCP Server...
+Tools available (step-by-step workflow):
+  1. fetch-github-issue
+  2. identify-liberty-packages
+  3. generate-component-diagram
+  4. format-analysis-comment
+  5. post-github-comment
+Ready!
+```
+
+### Test Flask UI
+
+```bash
+start_web_ui.bat  # Windows
+./start_web_ui.sh # Linux/Mac
+```
+
+Open http://localhost:5000 and test with a real issue.
+
+### Test Production Modules
+
+```bash
+cd src/main/python
+
+# Test analyzer
+python github_issue_analyzer.py https://github.com/OpenLiberty/open-liberty/issues/12345
+
+# Test diagram generator
+python github_issue_analyzer.py --json-only https://github.com/OpenLiberty/open-liberty/issues/12345 > analysis.json
+python diagram_generator.py analysis.json
+
+# Test comment poster (dry-run)
+python comment_poster.py --dry-run https://github.com/OpenLiberty/open-liberty/issues/12345 analysis.json diagram.md
+```
 
 ---
 
-## 👥 Team (dave, deval, hannah, issac)
+## 🚨 Troubleshooting
 
-- Person 1: GitHub Integration
-- Person 2: Package Analysis
-- Person 3: Visualization
-- Person 4: MCP Server & Demo
+### "ModuleNotFoundError: No module named 'yaml'"
+
+```bash
+pip install -r requirements.txt
+```
+
+### "MCP error -32000: Connection closed"
+
+1. Install dependencies: `pip install -r requirements.txt`
+2. Restart Bob completely
+3. Check Bob's MCP settings for errors
+
+### Flask UI won't start
+
+```bash
+pip install Flask requests pyyaml
+```
+
+### Bob doesn't see tools
+
+1. Verify Bob config at `C:/Users/[username]/.bob/settings/mcp_settings.json`
+2. Check file paths are correct
+3. Restart Bob completely
+4. Check Bob's error logs
+
+See [BOB_MCP_SETUP.md](./BOB_MCP_SETUP.md) for detailed troubleshooting.
+
+---
+
+## 📈 Architecture
+
+### MCP Integration (Bob)
+
+```
+Bob IDE
+  ↓ (uses MCP tools)
+MCP Server (mcp_server.py)
+  ↓ (imports)
+Production Modules
+  ├─ github_issue_analyzer.py
+  ├─ diagram_generator.py
+  └─ comment_poster.py
+```
+
+### Flask UI
+
+```
+Browser
+  ↓ (HTTP)
+Flask App (web_app.py)
+  ↓ (imports)
+Production Modules
+  ├─ github_issue_analyzer.py
+  ├─ diagram_generator.py
+  └─ comment_poster.py
+```
+
+**Key Point**: Both Bob and Flask UI use the **same production code**!
+
+---
+
+## 🎯 Success Metrics
+
+- ✅ **Bob Integration**: 5 granular tools for step-by-step workflow
+- ✅ **Flask UI**: Web interface for visual analysis
+- ✅ **No Code Duplication**: Both use same production modules
+- ✅ **Comprehensive Comments**: Detailed technical analysis
+- ✅ **Safety**: Dry-run by default before posting
+- ✅ **Documentation**: Complete setup and usage guides
+
+---
+
+## 👥 Team
+
+- **Dave** - GitHub Integration
+- **Deval** - Package Analysis  
+- **Hannah** - Visualization
+- **Issac** - MCP Server & Integration
 
 ---
 
 ## 📝 License
 
-Hackathon project - 2026
+Bobathon 2026 Hackathon Project
 
 ---
 
 ## 🆘 Need Help?
 
-**During Hackathon:**
-- Post in team Slack/Discord: #liberty-analyzer
-- Tag: `@team` for urgent issues
-
-**Resources:**
-- [MCP Docs](https://modelcontextprotocol.io/docs)
-- [gh CLI Help](https://cli.github.com/manual/)
-- [Mermaid Live Editor](https://mermaid.live/)
+1. **Setup Issues**: See [BOB_MCP_SETUP.md](./BOB_MCP_SETUP.md)
+2. **Usage Questions**: See [MCP_USAGE_EXAMPLES.md](./MCP_USAGE_EXAMPLES.md)
+3. **Architecture**: See [MCP_INTEGRATION.md](./MCP_INTEGRATION.md)
+4. **UI Issues**: See [VERIFY_UI.md](./VERIFY_UI.md)
 
 ---
 
 **Built for Bobathon 2026** 🤖
+
+**Key Features:**
+- 🔧 MCP integration for Bob IDE
+- 🌐 Flask web UI
+- 📊 Mermaid diagrams
+- 📝 Comprehensive analysis
+- 🔒 Safe (dry-run by default)
